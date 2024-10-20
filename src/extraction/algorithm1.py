@@ -35,7 +35,7 @@ class ExtractionAlgorithm:
         self.extracted_model = None
         
     def extract(self, subgraph_info, samples_per_class, epochs=200, lr=0.01, 
-                epsilon=0.0, use_hard_labels=True):
+                epsilon=0.0, use_hard_labels=True, verbose=True):
         """
         Main extraction algorithm (Algorithm 1).
         
@@ -46,11 +46,13 @@ class ExtractionAlgorithm:
             lr: Learning rate
             epsilon: Noise parameter for feature sampling
             use_hard_labels: Use hard labels (argmax) vs soft labels (probabilities)
+            verbose: Print progress
             
         Returns:
             Trained extracted model
         """
-        print(f"Starting extraction with {samples_per_class} samples per class...")
+        if verbose:
+            print(f"Starting extraction with {samples_per_class} samples per class...")
         
         # Lines 1-3: Initialize with original subgraph
         SA = []  # List of adjacency matrices
@@ -71,7 +73,8 @@ class ExtractionAlgorithm:
         SX.append(original_features)
         SL.append(original_labels)
         
-        print(f"Original subgraph: {original_features.shape[0]} nodes")
+        if verbose:
+            print(f"Original subgraph: {original_features.shape[0]} nodes")
         
         # Lines 4-10: Generate samples for each class
         print("Generating samples...")
@@ -105,10 +108,12 @@ class ExtractionAlgorithm:
                 SL.append(sample_labels)
         
         total_samples = len(SA)
-        print(f"Generated {total_samples} total samples")
+        if verbose:
+            print(f"Generated {total_samples} total samples")
         
         # Line 11: Create block diagonal adjacency matrix
-        print("Creating block diagonal matrix...")
+        if verbose:
+            print("Creating block diagonal matrix...")
         AG = self._create_block_diagonal_adjacency(SA)
         
         # Line 12: Concatenate features
@@ -121,15 +126,18 @@ class ExtractionAlgorithm:
         if use_hard_labels:
             LG = LG.argmax(dim=1)
         
-        print(f"Training data: {XG.shape[0]} nodes, {AG.shape[1]} edges")
+        if verbose:
+            print(f"Training data: {XG.shape[0]} nodes, {AG.shape[1]} edges")
         
         # Line 13: Train extracted GCN
-        print("Training extracted model...")
+        if verbose:
+            print("Training extracted model...")
         self.extracted_model = self._train_extracted_model(
-            AG, XG, LG, epochs, lr, use_hard_labels
+            AG, XG, LG, epochs, lr, use_hard_labels, verbose
         )
         
-        print("Extraction complete!")
+        if verbose:
+            print("Extraction complete!")
         return self.extracted_model
     
     def _get_subgraph_adjacency(self, subgraph_info):
@@ -159,7 +167,7 @@ class ExtractionAlgorithm:
         
         return block_diag
     
-    def _train_extracted_model(self, adjacency, features, labels, epochs, lr, use_hard_labels):
+    def _train_extracted_model(self, adjacency, features, labels, epochs, lr, use_hard_labels, verbose=True):
         """Train the extracted GCN model (line 13)."""
         # Convert adjacency to edge_index
         edge_index = adjacency_to_edge_index(adjacency)
@@ -192,7 +200,7 @@ class ExtractionAlgorithm:
             loss.backward()
             optimizer.step()
             
-            if (epoch + 1) % 50 == 0:
+            if verbose and (epoch + 1) % 50 == 0:
                 print(f"  Epoch {epoch+1}/{epochs}, Loss: {loss.item():.4f}")
         
         model.eval()
