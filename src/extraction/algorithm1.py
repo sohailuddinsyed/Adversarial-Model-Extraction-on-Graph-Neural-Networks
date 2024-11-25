@@ -177,10 +177,14 @@ class ExtractionAlgorithm:
         model = GCN(
             num_features=features.shape[1],
             hidden_dim=self.hidden_dim,
-            num_classes=self.num_classes
+            num_classes=self.num_classes,
+            dropout=0.5
         )
         
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
+        
+        # Create training mask (use all nodes)
+        train_mask = torch.ones(features.shape[0], dtype=torch.bool)
         
         # Training loop
         model.train()
@@ -191,11 +195,11 @@ class ExtractionAlgorithm:
             
             if use_hard_labels:
                 # Cross-entropy loss with hard labels
-                loss = F.nll_loss(out, labels)
+                loss = F.nll_loss(out[train_mask], labels[train_mask])
             else:
                 # KL divergence loss with soft labels
-                log_probs = F.log_softmax(out, dim=1)
-                loss = F.kl_div(log_probs, labels, reduction='batchmean')
+                log_probs = F.log_softmax(out[train_mask], dim=1)
+                loss = F.kl_div(log_probs, labels[train_mask], reduction='batchmean')
             
             loss.backward()
             optimizer.step()
