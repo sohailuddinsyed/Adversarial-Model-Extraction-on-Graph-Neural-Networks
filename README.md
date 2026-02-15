@@ -10,6 +10,12 @@ This project implements a model extraction attack on Graph Neural Networks (GNNs
 
 **Key Result**: Achieves **71.8% fidelity** (vs paper's 80%) with 10 samples per class on Cora dataset.
 
+#### Note on Development Timeline:
+
+This project was developed locally from September 2024 to April 2025 
+and published to GitHub in March 2025. Commit timestamps reflect the 
+actual development timeline during local development.
+
 ## Quick Start
 
 ### 1. Install Dependencies
@@ -75,6 +81,7 @@ See [RESULTS.md](RESULTS.md) for detailed analysis.
 
 - [DOCUMENTATION.md](DOCUMENTATION.md) - Detailed usage guide
 - [RESULTS.md](RESULTS.md) - Experimental results and analysis
+
 
 ## Citation
 
